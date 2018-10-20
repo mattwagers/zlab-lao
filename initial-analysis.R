@@ -6,10 +6,10 @@ library(dplyr)
 library(lme4)
 
 target.df %>%
-  group_by(Subject, OvOb, SubClit) %>%
+  group_by(Animacy) %>%
   mutate(SRC=I(Parse=="SRC")) %>%
   summarize(n.src=sum(SRC), n.obs=n(), p.src=(n.src+0.5)/(n.obs+1)) %>%
-  group_by(Subject, OvOb, SubClit) %>%
+  group_by(Animacy) %>%
   summarize(m.p = mean(p.src), s.p=sd(p.src), n.subj=n(), se.p=s.p/sqrt(n.subj)) -> p_summary.tab
 
 levels(target.df$SubClit) <- c("Subject Clitic", "No Subject Clitic")

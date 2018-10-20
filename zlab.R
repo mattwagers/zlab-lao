@@ -27,9 +27,12 @@ for (file in file_list){
 
 ## Clean up data frame
 dataset -> target.df
-target.df <- target.df[ , c(72, 69, 66, 40, 77, 1)]
 
-colnames(target.df) <- c("Subject","Sequence", "Item", "Condition", "Response", "InitiationTime")
+## TODO This is wrong. 1 "MouseRT" isn't what we want. It's the first member of the tTrajectory list.
+## Use the "extractTrajectory" function to get that.
+target.df <- target.df[ , c(72, 69, 66, 40, 77, 103)]
+
+colnames(target.df) <- c("Subject","Sequence", "Item", "Condition", "Response", "tTrajectory")
 target.df$Item %<>% as.factor
 target.df$Subject %<>% as.factor
 
