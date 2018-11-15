@@ -1,6 +1,10 @@
 {
-    "path" : "~/Dropbox/Projects/zapotec-analysis",
+    "path" : "~/Dropbox/Projects/WakandaForever[Dlinking+SDT]/killmonger[E1]/killmonger-analysis",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

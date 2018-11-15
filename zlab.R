@@ -108,25 +108,32 @@ duration$Duration = duration$Duration*1000
 
 duration$File %<>% as.factor
 
-target.df %<>% merge(duration, by = "File")
-target.df$TouchRT = target.df$InitiationTime - target.df$Duration
+target.df %<>% left_join(duration, by = "File")
 
+ntrials <- nrow(target.df)
+target.df$Initiation <- NA
+for(t in 1:ntrials){
+  parseTrajectory(target.df$tTrajectory[t])[1] -> target.df$Initiation[t]
+}
+
+target.df %<>% mutate(TouchRT = Initiation-Duration)
+target.df %<>% group_by(Subject) %>% mutate(zTRT = scale(TouchRT))
 summary(target.df$TouchRT)
 
-target.df %<>% subset(., (target.df$TouchRT > median(target.df$TouchRT) -  2.5*sd(target.df$TouchRT)) & (target.df$TouchRT < median(target.df$TouchRT) +  2.5*sd(target.df$TouchRT)))
-cat("Observations BEFORE exclusion", nrow(zlab), sep=" : ")
-cat("Observations AFTER exclusion", nrow(target.df), sep=" : ")
-cat("Percentage of observations excluded using deviation around median", round((nrow(zlab) - nrow(target.df))/nrow(zlab)*100, 2), sep = " : ")
-
-## Get descriptives
-
-target.df %>% group_by(Condition, Parse) %>%
-  summarize(n.obs = n(),
-            meanRT = mean(TouchRT),
-            sdRT = sd(TouchRT),
-            seRT = round(sdRT/sqrt(n.obs),2)) -> summary.df_overall_touchRT
-
-target.df %>% group_by(Condition, Animacy, Parse) %>%
-  summarize(n.obs = n(),
-            sdRT = sd(TouchRT),
-            seRT = round(sdRT/sqrt(n.obs),2)) -> summary.df_by_animacy_touchRT
+# target.df %<>% subset(., (target.df$TouchRT > median(target.df$TouchRT) -  2.5*sd(target.df$TouchRT)) & (target.df$TouchRT < median(target.df$TouchRT) +  2.5*sd(target.df$TouchRT)))
+# cat("Observations BEFORE exclusion", nrow(zlab), sep=" : ")
+# cat("Observations AFTER exclusion", nrow(target.df), sep=" : ")
+# cat("Percentage of observations excluded using deviation around median", round((nrow(zlab) - nrow(target.df))/nrow(zlab)*100, 2), sep = " : ")
+# 
+# ## Get descriptives
+# 
+# target.df %>% group_by(Condition, Parse) %>%
+#   summarize(n.obs = n(),
+#             meanRT = mean(TouchRT),
+#             sdRT = sd(TouchRT),
+#             seRT = round(sdRT/sqrt(n.obs),2)) -> summary.df_overall_touchRT
+# 
+# target.df %>% group_by(Condition, Animacy, Parse) %>%
+#   summarize(n.obs = n(),
+#             sdRT = sd(TouchRT),
+#             seRT = round(sdRT/sqrt(n.obs),2)) -> summary.df_by_animacy_touchRT

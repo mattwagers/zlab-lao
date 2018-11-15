@@ -6,10 +6,10 @@ library(dplyr)
 library(lme4)
 
 target.df %>%
-  group_by(Animacy) %>%
+  group_by(Subject, OvOb, SubClit) %>%
   mutate(SRC=I(Parse=="SRC")) %>%
   summarize(n.src=sum(SRC), n.obs=n(), p.src=(n.src+0.5)/(n.obs+1)) %>%
-  group_by(Animacy) %>%
+  group_by(Subject, OvOb, SubClit) %>%
   summarize(m.p = mean(p.src), s.p=sd(p.src), n.subj=n(), se.p=s.p/sqrt(n.subj)) -> p_summary.tab
 
 levels(target.df$SubClit) <- c("Subject Clitic", "No Subject Clitic")
@@ -30,7 +30,7 @@ p_summary.tab$Label[c(4,1,3,2)] -> labs
 
 p_summary.tab %>% ggplot(aes(y=m.p, ymin=m.p-se.p, ymax=m.p+se.p)) + labs(y = "p(SRC)")-> p
 
-# 830 x 622 PNG
+# 830 x 622 PNG -- LSA Abstract Photo
 p + geom_pointrange(aes(x=Condition), size=2.5, fatten=3) + 
   theme_tufte() + ylim(0.4,1) + 
   geom_hline(yintercept=0.5) + 
@@ -40,8 +40,6 @@ p + geom_pointrange(aes(x=Condition), size=2.5, fatten=3) +
   theme(plot.margin=unit(c(1/2,1,1/2,1/2), "cm"), 
         text = element_text(size=18), axis.title.x=element_blank())
 
-condition_labels <- read.csv("condition-labels.csv")
-target.df %<>% left_join(condition_labels)
 target.df$Condition -> target.df$Condition2
 levels(target.df$Condition2) <- rep(c("DP+Cl", "Cl", "In", "DP"), 2)
 contrasts(target.df$Condition2) <- contr.helmert(4) 
@@ -61,10 +59,12 @@ glm(Parse ~ Condition3, data=target.df, family=binomial) %>% summary
 glmer(Parse ~ Condition3 + (Condition3|Item), data=target.df, family=binomial) %>% summary
 
 ## 
-target.df %>% filter(zTRT < 3 & TouchRT<10000) %>% group_by(Subject) %>% summarize(medRT = median(TouchRT), muRT = mean(TouchRT), spread=IQR(TouchRT)) -> subject_means.tbl
+target.df %>% group_by(Subject) %>% summarize(medRT = median(TouchRT), muRT = mean(TouchRT), spread=IQR(TouchRT)) -> subject_means.tbl
 subject_means.tbl %<>% mutate(ranked = rank(medRT))
 subject_means.tbl %>% ggplot(aes(y=medRT)) -> subject_means.plot
-subject_means.plot + geom_linerange(aes(x=ranked,ymin=medRT-0.5*spread,ymax=medRT+0.5*spread)) + geom_point(aes(x=ranked, y=muRT), col="red") + scale_y_log10()
+subject_means.plot + geom_pointrange(aes(x=ranked,ymin=medRT-0.5*spread,ymax=medRT+0.5*spread), size=1/4) + geom_point(aes(x=ranked, y=muRT), col="blue") +
+  theme_tufte() + ylab("median Touch RT (ms)") + xlab("participant (ranked by median Touch RT)") + 
+  geom_rug(sides="l", alpha=1/2) + geom_hline(yintercept=median(subject_means.tbl$medRT), alpha=1/2, size=1/2, col="red")
 
-write.csv(target.df, file="zapotec-lao.csv")
 
+   )
