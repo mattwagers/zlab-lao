@@ -20,6 +20,14 @@ target.df %>%
   group_by(Subject, OvOb, SubClit) -> pSRC.by_subj.tbl
 ###
 
+### SHOW THAT THAT MOST PPL SHOW A PREFERENCE
+pSRC.by_subj.tbl %>% filter(OvOb=="No" & SubClit=="No") %>% mutate(src_pref=qlogis(p.src), pref=factor(sign(src_pref))) -> pSRC_NP_Only.by_subj.tbl
+pSRC_NP_Only.by_subj.tbl$src_pref %>% rank(ties.method="random") -> pSRC_NP_Only.by_subj.tbl$pref_order
+pSRC_NP_Only.by_subj.tbl %>% ggplot(aes(x=src_pref)) + geom_histogram(bins=9, aes(fill=pref)) + theme_minimal() + scale_fill_colorblind()
+pSRC_NP_Only.by_subj.tbl$src_pref %>% t.test
+#pSRC_NP_Only.by_subj.tbl %>% mutate(pref=sign(src_pref)) 
+###
+
 pSRC.by_subj.tbl %>% ggplot(aes(x=p.src)) + facet_grid(SubClit~.) + geom_density(position="stack", aes(fill=OvOb), adjust=1/7, alpha=0.5) + xlim(0,1) + scale_fill_colorblind()
 
 p_summary.tab$Label <- c("V=Cl DP", "V=Cl", "V DP Pro", "V + DP")
